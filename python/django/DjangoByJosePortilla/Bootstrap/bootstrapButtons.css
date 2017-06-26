@@ -1,0 +1,8 @@
+
+/*You can always override the specific traits if wanted. Just specify the class*/
+/*or id that you want to select*/
+/*TEST: add an additional class or id within the class quotes, then refer to*/
+/*just the new class if you really want to narrow the focus of the modification*/
+.override {
+  color: black;
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/connectFour.css' %}">
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <ul class="nav navbar-nav">
+          <li><a class="navbar-brand" href="{% url 'index' %}">DJANGO</a></li>
+          <li><a class="navbar-link" href="{% url 'admin:index' %}">Admin</a></li>
+          <li><a class="navbar-link" href="{% url 'basicApp:register' %}">Register</a></li>
+
+          {% if user.is_authenticated %}
+            <li><a class="navbar-link" href="{% url 'special' %}">Secret Page!</a></li>
+            <li><a class="navbar-link" href="{% url 'logout' %}">Logout</a></li>
+          {% else %}
+            <li><a class="navbar-link" href="{% url 'basicApp:user_login' %}">Login</a></li>
+          {% endif %}
+
+        </ul>
+      </div>
+    </nav>
+    <div class="container">
+      {% if user.is_authenticated %}
+        <p>You are logged in!</p>
+      {% else %}
+        <p>You are not yet logged in...</p>
+      {% endif %}
+    </div>
+
+
+    <div class="container-fluid">
+      {% block body_block %}
+      {% endblock %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+    {% block extra_js %}
+    {% endblock %}
+  </body>
+</html>

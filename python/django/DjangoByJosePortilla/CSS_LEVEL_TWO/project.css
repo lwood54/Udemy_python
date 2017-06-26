@@ -1,0 +1,39 @@
+h1 {
+   font-family: 'LibHandDisRegular';
+   font-weight: normal;
+   font-style: normal;
+   text-align: center;
+}
+
+.colorcontainer {
+  height: 600px;
+  margin: 0;
+}
+
+
+p {
+  float: left;
+  width: 17.5%;
+  height: 550px;
+  margin: 1%;
+}
+
+#one {
+  background: #05668D;
+}
+
+#two {
+  background: #028090;
+}
+
+#three {
+  background: #00A896;
+}
+
+#four {
+  background: #02C39A;
+}
+
+#five {
+  background: #F0F3BD;
+}

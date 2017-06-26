@@ -1,0 +1,40 @@
+.title {
+  text-align: center;
+}
+
+#gameContainer {
+  width: 60%;
+
+}
+
+#reset {
+  padding: 10px;
+}
+
+.button {
+  text-align: center;
+  width: 25%;
+  padding: 10px;
+}
+.gameboard {
+  border: 4px solid black;
+  background-color: gray;
+  border-radius: 50%;
+  float: left;
+  width: 100px;
+  height: 100px;
+  padding: 5px;
+  margin: 3px;
+}
+
+.blueChip {
+  background-color: blue;
+}
+
+.redChip {
+  background-color: red;
+}
+
+.grayChip {
+  background-color: gray;
+}

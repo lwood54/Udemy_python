@@ -1,0 +1,602 @@
+#################
+FOCUSING ON CLASS BASED VIEWS (CBV)
+#################
+1. setup a project as normal
+2. setup an app as normal
+
+3. /cbvProj/cbvProj/settings.py
+    >>>TEMPLATE_DIR = os.path.joint(BASE_DIR,'templates') <--- ADD CODE!!!
+    >>>INSTALLED_APPS = [
+        'django.contrib.admin',
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.messages',
+        'django.contrib.staticfiles',
+        'basic_app',          <--- ADD CODE!!!
+    ]
+    >>>TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [TEMPLATE_DIR,],    <--- ADD CODE!!!
+            ......
+        }
+4. create "templates" folder in project directory
+5. /cbvProj/templates/index.html  <--- ADD CODE!!!
+6. /cbvProj/templates/base.html   <--- ADD CODE!!!
+7. setup base.html, add bootstrap, css, jQuery if needed
+  NOTE: make sure that however you setup jQuery, the jQuery has to load
+  BEFORE whatever js script you want running on the page or it will not
+  work correctly.
+
+8. /cbvProj/templates/index.html:
+  >>>
+    {% extends 'base.html' %}
+    {% block body_block %}
+      <h1>Hello World! Index Page Home</h1>
+    {% endblock %}
+
+########
+NOW SETTING UP Class Based Views (CBV)
+########
+9. /cbvProj/basic_app/views.py:
+  >>>
+  def index(request):
+    return render(request,'index.html')   <--- ADD CODE!!!
+10. /cbvProj/cbvProj/urls.py:
+  >>>
+  from django.conf.urls import url
+  from django.contrib import admin
+  from basic_app import views   <--- ADD CODE!!!
+
+  urlpatterns = [
+      url(r'^admin/', admin.site.urls),
+      url(r'^$',views.index),   <--- ADD CODE!!!
+  ]
+
+11. NOTE: Remember to run migrations before you try running the server!!!
+command line from within the project directory:
+>>>python manage.py migrate
+>>>python manage.py makemigrations basic_app
+>>>python manage.py migrate
+
+#######################################
+That was a NORMAL SETUP...now we can turn it in to a CLASS BASED VIEW (CBV)
+#######################################
+1. /cbvProj/basic_app/views.py:
+  >>> (we are replacing some code with new code to make CBV)
+  from django.views.generic import View <--- ADD CODE!!!
+  from django.http import HttpResponse  <--- ADD CODE!!!
+  NOTE: this is the very basic "manual" way of showing CBV, we normally
+  wouldn't do this with an HttpResponse
+
+  delete def index(request):...
+
+  replace with:
+  class CBView(View):
+    def get(self,request):
+      return HttpResponse("Class Based Views are cool!")
+      NOTE: this is the very basic "manual" way of showing CBV, we normally
+      wouldn't do this with an HttpResponse
+
+2. Now we have to change the /cbvProj/cbvProj/urls.py file:
+  original: url(r'^$',views.index)
+  change to: url(r'^$',views.CBView.as_view())
+
+NOTE: According to the instructor, Jose, this may at first seem more
+complicated than the original function based views, but he ensures
+that in the lectures to come, it will become clear how much time and
+work it will save to use CBVs and that they are in fact easier to use.
+
+#######################
+TEMPLATE VIEWS with Clas Based Views
+#######################
+1. /cbvProj/basic_app/views.py:
+  >>>
+  from django.shortcuts import render
+  from django.views.generic import View,TemplateView
+
+  class IndexView(TemplateView):
+      template_name = 'index.html'
+      # If you had a subdirectory in 'templates' folder, then
+      # you would need to do '/sub_name/index.html'
+
+2. /cbvProj/cbvProj/urls.py:
+    >>>
+    from django.conf.urls import url
+    from django.contrib import admin
+    from basic_app import views
+
+    urlpatterns = [
+        url(r'^admin/', admin.site.urls),
+        url(r'^$',views.IndexView.as_view()), <--- ADD CODE!!!
+    ]
+
+#################
+Injecting context dictionaries into html
+#################
+1. /cbvProj/basic_app/views.py:
+  >>>
+  from django.shortcuts import render
+  from django.views.generic import View,TemplateView
+
+  class IndexView(TemplateView):
+      template_name = 'index.html'
+      # If you had a subdirectory in 'templates' folder, then
+      # you would need to do '/sub_name/index.html'
+
+      def get_context_data(self,**kwargs):
+          context = super().get_context_data(**kwargs)
+          context['injectme'] = 'BASIC INJECTION!'
+          return context
+
+############################################
+Implementing ListView and DetailView
+############################################
+1. /cbvProj/basic_app/models.py:
+  >>>
+  from django.db import models
+
+  # Create your models here.
+  class School(models.Model):
+      name = models.CharField(max_length=256)
+      principal = models.CharField(max_length=256)
+      location = models.CharField(max_length=256)
+
+      def__str__(self):
+      return self.name
+
+  class Student(models.Model):
+      name = models.CharField(max_length=256)
+      age = models.PositiveIntegerField()
+      school = models.ForeignKey(School,related_name='students')
+
+      def __str__(self):
+          return self.name
+
+2. Now we need to register the models in admin.py
+  /cbvProj/basic_app/admin.py:
+  >>>
+  from django.contrib import admin
+  from basic_app.models import School,Student
+
+  # Register your models here.
+  admin.site.register(School)
+  admin.site.register(Student)
+
+3. Next, you want to test to see if it worked, so:
+  command line:
+    >>>python manage.py migrate
+    >>>python manage.py makemigrations basic_app
+    >>>python manage.py migrate
+    >>>python manage.py createsuperuser
+    username...
+    email address...
+    password...
+    >>>python manage.py runserver
+
+#############################
+ADDING HTML template files with a different approach
+#############################
+1. instead of using/creating 'templates' directory in the main project
+  directory, we will create a templates directory inside the app directory
+  /cbvProj/basic_app:
+    /templates  <--- create directory
+
+  /cbvProj/basic_app/templates
+    /basic_app  <--- create directory
+
+  /cbvProj/basic_app/templates/basic_app:
+    basic_app_base.html <--- create file
+    school_detail.html  <--- create file
+    school_list.html    <--- create file
+
+2. /cbvProj/basic_app/views.py:
+  >>> (the earlier example has been modified to...)
+
+  from django.shortcuts import render
+  from django.views.generic import View,TemplateView,ListView,DetailView
+  from . import models
+
+  class IndexView(TemplateView):
+      template_name = 'index.html'
+
+  class SchoolListView(ListView):
+      model = models.School
+
+  class SchoolDetailView(DetailView):
+      model = models.School
+      template_name = 'basic_app/school_detail.html'
+
+3. Setup the html templates:
+  We are going to do base.html and index.html, which are still in:
+    /cbvProj/templates:
+
+    we set up the original base.html:
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title></title>
+        <!-- Latest Bootstrap as of: 4/11/17 -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+      </head>
+      <body>
+
+        <nav class="navbar navbar-default navbar-static-top">
+          <ul class="nav navbar-nav">
+            <li><a class="navbar-brand" href="{% url 'basic_app:list' %}">Schools</a></li>
+            <li><a class="navbar-link" href="{% url 'admin:index' %}">Admin</a></li>
+            <li><a href="#"></a></li>
+          </ul>
+
+        </nav>
+        <div class="container">
+          {% block body_block %}
+          {% endblock %}
+        </div>
+
+      </body>
+    </html>
+
+4. Then he copied it and pasted it into:
+    cbvProj/basic_app/templates/basic_app/basic_app_base.html
+
+5. Now we are setting up index.html:
+  >>>
+  {% extends 'base.html' %}
+  {% block body_block %}
+    <div class="jumbotron">
+      <h1>Home Page!</h1>
+    </div>
+
+  {% endblock %}
+
+6. Now we want to set up the page that lets us look at the list of schools.
+  So we go: /cbvProj/basic_app/templates/basic_app/school_list.html:
+  >>>
+
+  {% extends "basic_app/basic_app_base.html"%}
+
+  {% block body_block %}
+
+  <h1>Welcome to a list of all the schools!</h1>
+    <ol>
+      {% for school in schools %}
+      <h2><li>{{ school.name }}</li></h2>
+      {% endfor %}
+    </ol>
+  {% endblock %}
+  NOTE: in {% for school in schools %}, it was originally
+  {% for school in school_list %}, because that's how Django automatically
+  sets it up, but we can change the name of the template tag by
+  going into the views.py file and defining "context_object_name"
+  example of what we did:
+
+  class SchoolListView(ListView):
+      context_object_name = 'schools' <--- ADDED CODE!!!
+      model = models.School
+  NOTE: Now we can refer to it in the html tagging system however we
+  need.
+
+7. Next we set up our school_detail.html page:
+  >>>
+
+  {% extends 'basic_app/basic_app_base.html' %}
+  {% block body_block %}
+  <div class="jumbotron">
+    <h1>Welcome to the School Detail Page</h1>
+    <h2>School Details:</h2>
+    <p>Name: {{ school_detail.name }}</p>
+    <p>Principal: {{ school_detail.principal }}</p>
+    <p>Location: {{ school_detail.location }}</p>
+
+  </div>
+  {% endblock %}
+
+8. Then we need to connect the views and html pages to our urls.py file.
+  /cbvProj/cbvProj/urls.py:
+  >>>
+
+  from django.conf.urls import url,include
+  from django.contrib import admin
+  from basic_app import views
+
+  urlpatterns = [
+      url(r'^admin/', admin.site.urls),
+      url(r'^$',views.IndexView.as_view()),
+      url(r'^basic_app/',include('basic_app.url',namespace='basic_app')), <--- ADDED CODE!!!
+  ]
+
+9. Now, since we didn't actually create the basic_app.urls.py file, we need to do that.
+  /cbvProj/basic_app/urls.py:
+  >>>
+
+  from django.conf.urls import url
+  from basic_app import views
+
+  app_name = 'basic_app'
+
+  urlpatterns = [
+      url(r'^$',views.SchoolListView.as_view(),name='list')
+  ]
+
+    NOTE: Remember that we needed to define the "app_name" so that
+    we can refer to it in the html pages.
+    Ex:
+    <li><a class="navbar-brand" href="{% url 'basic_app:list' %}">Schools</a></li>
+
+10. NOTE: We did not set a "primary" key to any of the students because
+    there may be multiple students with the same name. So what Django
+    does, if there is no "primary" key identified, is to define a serial ID
+    to it in the background.
+      So we can then use that to call on the ID at a later time.
+
+11. If we are viewing the school_list.html and we wanted to be able
+    to click directly on the school and have it take us to the
+    school_detail.html page, then we need to:
+      /cbvProj/basic_app/templates/basic_app/school_list.html
+      {% extends "basic_app/basic_app_base.html"%}
+
+      {% block body_block %}
+
+      <h1>Welcome to a list of all the schools!</h1>
+        <ol>
+          {% for school in schools %}
+          <h2><li><a href="{{ school.id }}">{{ school.name }}</a></li></h2>   <--- ADDED CODE!!!
+          {% endfor %}
+        </ol>
+      {% endblock %}
+NOTE: adding the "{{ school.id }}" basically links the href to a number,
+which we will later take advantage of on the urls.py file.
+
+12. We may also want to add a list of all the students at a particlar
+    school.
+    /cbvProj/basic_app/templates/basic_app/school_detail.html:
+    >>>
+
+    {% extends 'basic_app/basic_app_base.html' %}
+    {% block body_block %}
+    <div class="jumbotron">
+      <h1>Welcome to the School Detail Page</h1>
+      <h2>School Details:</h2>
+      <p>Name: {{ school_detail.name }}</p>
+      <p>Principal: {{ school_detail.principal }}</p>
+      <p>Location: {{ school_detail.location }}</p>
+      <h3>Students:</h3>
+
+      {% for student in school_detail.students.all %}
+        <p>{{ student.name }} who is {{ student.age }} years old.</p>
+      {% endfor %}
+
+    </div>
+    {% endblock %}
+NOTE: In "school_detail.students.all" the stduents.all part is available
+      because we provided the "related_name=students" to connect it
+      to the school ForeignKey. Then we just call .all off of it.
+
+13. We need to update the basic_app/urls.py file to take advantage of
+    the school.id on the school_list.html page.
+    cbvProj/basic_app/urls.py:
+    >>>
+
+    from django.conf.urls import url
+    from basic_app import views
+
+    app_name = 'basic_app'
+
+    urlpatterns = [
+        url(r'^$',views.SchoolListView.as_view(),name='list'),
+        url(r'^(?P<pk>[-\w]+)/$',views.SchoolDetailView.as_view(),name='detail'), <--- ADDED CODE!!!
+    ]
+
+#########################################################
+CRUD APPLICATIONS
+#########################################################
+C = Create
+R = Retrieve
+U = Update
+D = Delete
+
+################################
+WORKING WITH CREATING VIEWS
+################################
+1. cbvProj/basic_app/views.py:
+    >>>
+
+    from django.shortcuts import render
+    from django.views.generic import (View,TemplateView,
+                                    ListView,DetailView,
+                                    CreateView,UpdateView,
+                                    DeleteView)
+    from . import models
+
+    class IndexView(TemplateView):
+        template_name = 'index.html'
+
+    class SchoolListView(ListView):
+        context_object_name = 'schools'
+        model = models.School
+
+    class SchoolDetailView(DetailView):
+        context_object_name = 'school_detail'
+        model = models.School
+        template_name = 'basic_app/school_detail.html'
+
+    class SchoolCreateView(CreateView):   <--- ADDED CODE!!!
+        model = models.School             <--- ADDED CODE!!!
+    NOTE: Now that we have crated a new views class, we need
+          to connect the basic_app.urls.py file.
+
+2. cbvProj/basic_app/urls.py:
+    >>>
+
+    from django.conf.urls import url
+    from basic_app import views
+
+    app_name = 'basic_app'
+
+    urlpatterns = [
+        url(r'^$',views.SchoolListView.as_view(),name='list'),
+        url(r'^(?P<pk>\d+)/$',views.SchoolDetailView.as_view(),name='detail'),
+        url(r'^create/$',views.SchoolCreateView.as_view(),name='create'),  <--- ADDED CODE!!!
+    ]
+
+NOTE: INTENTIONAL ERRORS TO ADDRESS:
+1st ERROR: It would not let us view the create template because fields had not
+    been defined. So in the
+    /cbvProj/basic_app/views.py:
+      >>>
+
+      class SchoolCreateView(CreateView):
+          fields = ('name',"principal",'location')  <--- ADDED CODE!!!
+          model = models.School
+
+2nd Error: After the fields were fixed, it tried to look for
+    "basic_app/school_form.html". So we will add that file:
+    /cbvProj/basic_app/templates/basic_app:
+      school_form.html  <--- CREATE FILE!!!
+
+3. After we have created the form template it was looking for, we
+    need to edit that form to make it usable:
+    cbvProj/basic_app/templates/basic_app/school_form.html:
+    >>>
+
+    {% extends "basic_app/basic_app_base.html" %}
+
+    {% block body_block %}
+
+    <h1>
+      {% if not form.instance.pk %}
+      Create School
+      {% else %}
+      Update School
+      {% endif %}
+    </h1>
+
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" class="btn btn-primary" value="Submit">
+
+      </form>
+
+    {% endblock %}
+
+##################################
+NEW ERROR to address:
+##################################
+Once we have the form and try to add a new school, it tells us that
+"No URL to redirect to. Either provide a url or define a
+get_absolute_url method on the Model."  (which is what we will be doing.)
+
+cbvProj/basic_app/models.py:
+  >>>
+
+  from django.db import models
+  from django.core.urlresolvers import reverse
+
+  # Create your models here.
+  class School(models.Model):
+      name = models.CharField(max_length=256)
+      principal = models.CharField(max_length=256)
+      location = models.CharField(max_length=256)
+
+      def __str__(self):
+          return self.name
+
+      def get_absolute_url(self):   <--- ADDED CODE!!!
+          return reverse("basic_app:detail",kwargs={'pk':self.pk})  <--- ADDED CODE!!!
+
+  class Student(models.Model):
+      name = models.CharField(max_length=256)
+      age = models.PositiveIntegerField()
+      school = models.ForeignKey(School,related_name='students')
+
+      def __str__(self):
+          return self.name
+
+################################
+WORKING WITH UPDATING VIEWS
+################################
+
+1. cbvProj/basic_app/views.py:
+    >>> (ADD this additional class)
+
+    class SchoolUpdateView(UpdateView):
+        fields = ('name','principal')
+        model = models.School
+
+2. cbvProj/basic_app/urls.py:
+    >>> (ADD additional url patter to urlpatterns)
+
+    url(r'^update/(?P<pk>\d+)/$',views.SchoolUpdateView.as_view(),name='update'),
+
+3. Then we have to edit the html file that relates to the school_detail page.
+      cbvProj/basic_app/templates/basic_app/school_detail.html:
+      >>>
+
+      {% extends 'basic_app/basic_app_base.html' %}
+      {% block body_block %}
+      <div class="jumbotron">
+        <h1>Welcome to the School Detail Page</h1>
+        <h2>School Details:</h2>
+        <p>Name: {{ school_detail.name }}</p>
+        <p>Principal: {{ school_detail.principal }}</p>
+        <p>Location: {{ school_detail.location }}</p>
+        <h3>Students:</h3>
+
+        {% for student in school_detail.students.all %}
+          <p>{{ student.name }} who is {{ student.age }} years old.</p>
+        {% endfor %}
+
+      </div>
+
+      <div class="container">   <--- ADDED CODE!!! all new inside this <div>
+        <p><a class="btn btn-warning" href="{% url 'basic_app:update' pk=school_detail.pk %}">Update</a></p>
+
+      </div>
+      {% endblock %}
+
+
+################################
+WORKING WITH DELETING VIEWS
+################################
+1. cbvProj/basic_app/views.py:
+    >>> (ADD import and ADD a DeleteView class)
+
+    from django.core.urlresolvers import reverse_lazy
+
+    class SchoolDeleteView(DeleteView):
+        model = models.School
+        success_url = reverse_lazy("basic_app:list")
+
+2. Then we have to update the basic_app.urls.py file:
+  cbvProj/basic_app/urls.py:
+    >>> (ADD pattern to urlpatterns)
+
+    url(r'^delete/(?P<pk>\d+)/$',views.SchoolDeleteView.as_view(),name='delete'),
+
+3. Then we will have to add a new html file that confirms the school
+    has been deleted.
+
+    cbvProj/basic_app/templates/basic_app:
+      school_confirm_delete.html  <--- CREATE FILE
+
+4. Edit that html file:
+    cbvProj/basic_app/templates/basic_app/school_confirm_delete.html:
+    >>>
+
+    {% extends "basic_app/basic_app_base.html" %}
+
+    {% block body_block %}
+
+    <h1>Delete {{ school.name }}?</h1>
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="submit" class="btn btn-danger" value="Delete">
+      <a href="{% url 'basic_app:detail' pk=school.pk %}">Cancel</a>
+    </form>
+
+    {% endblock %}

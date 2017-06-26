@@ -1,0 +1,28 @@
+/* This is a comment */
+
+/*some text here: you can still do command forward slash to turn this into a comment*/
+
+
+/*BASIC FORMAT:*/
+/*selected tag{
+  property: value;
+}*/
+
+
+h1{
+  color: blue;
+}
+
+li{
+  color: rgb(191, 131, 42);
+}
+
+p{
+  color: #3d9ae5;
+}
+
+/*REMINDER: rgba allows for transaprency, the closer to 1 it is, the more solid*/
+/*the closer to 0 it is, the more transparent.*/
+h4{
+  color: rgba(255, 97, 0, 0.75);
+}

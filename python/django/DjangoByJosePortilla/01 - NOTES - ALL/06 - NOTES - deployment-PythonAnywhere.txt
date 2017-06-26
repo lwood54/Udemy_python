@@ -1,0 +1,152 @@
+######################
+Deployment on www.pythonanywhere.com
+######################
+1. login to www.pythonanywhere.com
+
+2. >>>console tab:
+      click on: "Bash"
+
+3. create a virtual environment
+  >>>mkvirtualenv --python=python3.5 myproj
+
+4. to see what packages are already installed:
+  >>>pip list
+
+5. we need to install django (whatever version was used on the project)
+  >>>pip install -U django==1.10.5
+  NOTE: to check which version of django you have, go to computer console,
+        >>>python
+        ...
+        >>>import django
+        >>>django.__version__   (then it will return the version)
+
+6. to test that it was installed:
+  >>>which django-admin.py
+
+7. If your project needs any other libraries or packages, this is
+  where you would install it now
+
+8. to download repo from git
+    - click on the download or copy button
+    - copy to clip board
+    - go back to pythonanywhere console:
+      >>>git clone https://github.com/lwood54/django-deployment-example.git
+      (paste in the https://github.....)
+
+9. then navigate to your project folder and open that directory
+
+10. pythonanywhere...
+    >>>python manage.py migrate
+
+11. pythonanywhere...
+    >>>python manage.py makemigrations basicApp
+
+12. pythonanywhere...
+    >>>python manage.py migrate
+
+13. pythonanywhere...
+    >>>python manage.py createsuperuser
+    ...go through steps
+
+14. go back to dashboard
+
+15. click on "Web" tab and then click "+ Add a new web app"
+
+16. confirm url (for free site it will be username.pythonanywhere.com)
+17. click next
+18. click Manual configuration (because we already have an app)
+    NOTE: could select Django here if you don't already have an app
+19. click Python 3.5
+20. it will tell you that you will need to edit your own WSGI configuration
+    but they will create a WSGI file for you that includes a simple
+    "Hello World" app.
+21. click next
+22. then you can copy and paste the url into a new window, you will see
+    the Hello World application first beause we have not yet made changes
+
+23. scroll down to "Virtualenv:" section
+24. click on "Enter path to a virtualenv, if desired"
+
+25. fill in:
+    >>>/home/lwood3499/.virtualenvs/myproj
+
+26. scroll to "Code" section
+    Source code: click on "Enter the path to your web app source code"
+    NOTE: to get that if you forget, click the "Start a console in this virtualenv"
+    then cd into the project directory like normal,
+    then type pwd to (Print Working Directory)
+
+    copy and paste that into the code section listed above
+
+27. click on the "WSGI configuration file:"
+    NOTE: it will take you to a place you can edit the file
+
+28. delete the Hello World page section (around lines 13 to 47)
+
+29. Scroll down to the "Django" section and start uncommenting some
+    of the lines.
+
+30. uncomment:
+    import os
+    import sys
+
+    path = '/home/lwood3499/django-deployment-example/learningUsers'
+          NOTE: same as pasted file path in step 26
+    if path not in sys.path:
+      sys.path.append(path)
+    then add this right after the above code:
+    os.chdir(path)    #this changes the path to the one we created
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE","learningUsers.settings")
+
+    import django
+    django.setup()
+
+    then uncomment some more:
+    from django.core.wsgi import get_wsgi_application
+    application = get_wsgi_application()
+
+31. save, then go back to th "Dashboard"
+
+32. click on the "Web" tab, then click on the link for the website
+
+33. The site works, but it still doesn't know where to look for the
+    static files.
+
+34. Go to the "Web" tab
+35. You will need to create a static link for the "admin" files, AND
+    a link to the user created static files like JS and CSS
+
+36. click on the "Enter URL"
+    add --> /static/admin
+
+    click on "Enter path"
+    add --> /home/lwood3499/.virtualenvs/myproj/lib/python3.5/site-packages/django/contrib/admin/static/admin
+
+    click on the "Enter URL"
+    add --> /static/
+
+    click on "Enter path"
+    add --> /home/lwood3499/django-deployment-example/learningUsers/static
+    NOTE: obviously these files paths need to be accurate to whatever
+    project and file you are working on.
+
+37. any time changes are made like above, we'll need to relaod the web app
+    So, scroll up to the top and click on
+    "Reload lwood3499.pythonanywhere.com"
+
+38. to allow pythonanywhere to host this code, go into Django files...
+    - go to "Files" tab and
+    - open up django-deployment-exmaple
+    - open learningUsers
+    - open settings.py
+      ALLOWED_HOSTS = ['lwood3499.pythonanywhere.com']
+
+39. to create a new folder, you can manipulate, open files from the
+    "Files" tab, then you can add "New directory"
+    NOTE: I am using a project that already had a static directory,
+          but this is how I would add it if I wanted to work on it.
+
+40. If you create any new directories or change settings, make sure
+    to go to "Web" tab and reload the web app again.
+
+41. Now in settings.py, switch the DEBUG = False

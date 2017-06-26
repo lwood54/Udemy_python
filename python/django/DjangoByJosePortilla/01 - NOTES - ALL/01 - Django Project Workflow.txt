@@ -1,0 +1,558 @@
+#####################################################################
+
+SETTING UP VIRTUAL ENVIRONMENT
+
+#####################################################################
+
+** To make a NEW VIRTUAL ENVIRONMENT:
+command line: conda create --name schoolDjangoEnv django
+
+1. Start Virtual Environment
+  
+	* console: source activate env_name
+  
+	* console: source deactivate env_name (when done)
+    
+		- to get list of environments created:
+      console: conda info --envs
+
+
+#####################################################################
+        
+STARTING A NEW PROJECT
+
+#####################################################################
+
+
+2. Start NEW Project:
+  
+	* console: django-admin startproject new_project_name
+
+
+3. Open new project
+
+
+#####################################################################
+        
+STARTING A NEW APP WITHIN THE PROJECT
+
+#####################################################################
+4. Start NEW App:
+  
+	* console: python manage.py startapp new_app_name
+
+
+
+5. Create a templates directory in the main project directory
+
+
+
+6. Create a subdirectory in the templates directory for any application that will be in the main project.(It's recommended to use the same name as the app name.)
+
+
+
+7. put any html files in this subdirectory in templates that will be used to create different urls for the site. Ex: index.html, help.html, etc
+
+#### NOW TO LINK EVERYTHING ####
+
+
+
+8. In the app directory, create a new urls.py file.
+
+
+
+9. In the app/urls.py file, make sure to import
+  
+	code:
+    from django.conf.urls import url
+    
+		 from app_directory_name import views
+
+
+
+10. Then setup the urlpatterns[]
+  
+	ex:
+    urlpatterns = [
+      
+			url(r'^$',views.index,name='index'),	## broadest address catch
+
+			url(r'^index/$',views.index,name='index'),	## catches indx.html
+    
+		]
+
+
+
+11. Also need to link the urls.py file in the main project directory
+
+
+
+12. Make sure these are imported into the urls.py of main project directory:
+  
+	code:
+  from django.conf.urls import url,include
+  
+	       from django.contrib import admin
+
+	       from app_directory_name import views
+
+
+
+13. Make another urlpatterns[] for this file as well.
+ 
+	Ex:
+   urlpatterns = [
+       
+		url(r'^$',views.index,name='index'), ## broad catch
+
+	        url(r'^index/$',views.index,name='index'), ## catches index
+
+	        url(r'^app1/',include('app1.urls')), ## includes search in app directory urls.py file
+
+	        url(r'^admin/', admin.site.urls),
+   
+	      ]
+
+
+
+14. You may want to add the additional import:
+  
+	code:
+    from django.http import HttpResponse
+
+
+
+15. make a function to call the page you setup the url links for.
+	Go to the app_directory views.py file and put in 
+code:
+  
+		def index(request):
+    			dictionary_name = {'key variable used in html': "Html value that will be called when the key is referenced."}
+
+			return render(request,'app_directory/index.html',context=dictionary_name)
+
+
+		NOTE: in the render(), make sure to use the name of the directory that is stored in the templates directory, then call the file from there. 			It is good to use the same app_name, but it might not always be the case.
+c
+
+
+16. Now go to settings and link all the references to the new app and template directory.
+  
+	* in settings of main project directory:
+    
+		add this code below BASE_DIR:
+    
+		TEMPLATE_DIR = os.path.join(BASE_DIR,"templates")
+    
+			NOTE: This connects the base directory with the templates directory, which is where the html pages are stored.
+  
+	* go to the list INSTALLED_APPS = [], and make sure to add the new app you are trying to link
+  
+	* go down to TEMPLATES = [{}] list and make sure to add
+    		TEMPLATE_DIR, ------> inside the [] value for the 'DIRS' key
+
+
+
+17. To run:
+  make sure to be in the main project directory that contains the manage.py file and put the following code in the console:
+    
+	in console: python manage.py runserver
+
+
+#####################################################################
+
+Setting up static images or other static files (css, js, etc...)
+
+#####################################################################
+
+
+1. create new directory called "static" inside the main project directory
+
+
+
+2. inside the new static directory, create another directory and call it images
+
+
+
+3. then you have to tell django where to find the static images, 
+	go to settings.py file and create a new variable below BASE_DIR, 
+	called STATIC_DIR
+  code: 
+		STATIC_DIR = os.path.join(BASE_DIR,"static")
+
+
+
+4. scroll down in settings.py and find the "STATIC_URL = '/static/'" variable. Beneath that variable, we will make a new variable that is equal to a list. Inside the list add the STATIC_DIR that was just created in step 3.
+  
+	code:
+    STATIC_URL = '/static/' <------code already there
+    		 STATICFILES_DIRS = [  <------ new code
+      
+			STATIC_DIR,
+    
+		 ]
+    
+
+			NOTE: He recommended making sure there wasn't already a "STATICFILES_DIRS" defined. Though, he didn't say what to do if there is. I will have to mess with it, but I assume we could just add the STATIC_DIR, inside the already defined list???
+
+
+
+5. add images to the static/images directory
+
+	
+
+NOTE: static files don't have to just be images, they can be any file type that won't be changing, like .css and .js
+
+
+
+6. in static directory, make a new directory called css, then create a file (name it however you would name a css file)
+
+
+
+#####################################################################
+
+CREATING MODELS
+
+#####################################################################
+
+
+1. open up models.py in the app directory
+  
+	make sure to have import code at the top:
+
+	code:
+		from django.db import models
+
+
+###############
+EXAMPLE CODE TO SHOW MODELS
+###############
+
+###########################################################
+
+
+
+class Topic(models.Model):
+        
+	top_name = models.CharField(max_length=264,unique=True)
+
+
+
+	def __str__(self):
+
+		return self.top_name
+
+
+
+class Webpage(models.Model):
+
+	topic = models.ForeignKey(Topic)
+
+	name = models.CharField(max_length=264,unique=True)
+
+	url = models.URLField(unique=True)
+
+
+
+	def __str__(self):
+            		return self.name
+
+
+
+class AccessRecord(models.Model):
+
+	name = models.ForeignKey(Webpage)
+
+	date = models.DateField()
+
+
+
+	def __str__(self):
+
+		return str(self.date)
+
+
+
+###############     END OF EXAMPLE CODE    ###############
+    ###########################################################
+
+
+
+2. After you have setup your classes, you will need to migrate them. In the main project directory type in the console:
+  
+	code: python manage.py migrate
+
+
+
+3. Then you have to register the changes to your application. Do this by typing in the console from within the main project directory:
+  
+	code: python manage.py makemigrations name_of_app
+
+
+
+4. Then you will need to do step 2 AGAIN:
+
+	code: python manage.py migrate
+
+
+
+5. To confirm that this all worked, we will use some test data with shell commands. In console:
+
+	code: python manage.py shell
+
+
+
+6. I'm going to type all the code we do in the console to test below:
+
+	code:
+>>> from first_app_my.models import 
+	Topic
+>>> print(Topic.objects.all())
+  **it returned: <QuerySet []> 
+		NOTE: there is no data in there yet)
+
+	>>> t = Topic(top_name="Social Network")
+	>>> t.save()
+
+		NOTE: .save() is a method we inherit from the models.Model
+
+	class
+>>> print(Topic.objects.all())
+		NOTE: same command from earlier to see change
+  **it returned: <QuerySet [<Topic: Social Network>]>
+>>> quit()
+		
+
+NOTE: Instead of always checking if things are working by using the shell, we are going to use Django's very good "admin interface". In order to have the admin interface with the models, we need to register them to our application's admin.py file.
+
+
+#####################################################################
+        ####### IMPORTANT ########
+
+
+Apparently it really messes things up to do this out of order. Make SURE to migrate, then makemigrations, then migrate again before doing the next step of registering appliction in admin.py file.
+
+
+
+#####################################################################
+#####################################################################
+        REGISTERING APPLICATION TO admin.py file
+
+#####################################################################
+
+1. Once application's admin.py file is open, add import code:
+
+	code: from app_name.models import all,of,the,models,using,commas
+
+	ex:
+
+		from first_app_my.models import AccessRecord,Topic,Webpage
+
+
+
+2. Then, in the same application's admin.py file, you register your models with the following code:
+
+	code:
+		
+admin.site.register(AccessRecord)
+		
+admin.site.register(Topic)
+		
+admin.site.register(Webpage)
+
+			
+
+NOTE: In order to fully use the database with the admin interface, we need to create a superuser. This helps protect access to the bones of the project.
+
+
+
+3. From within the main project directory, in the console:
+
+	code:
+		python manage.py createsuperuser
+
+
+
+4. You must provide a username, email, and password.
+	NOTE: make sure to remember them or you will have to do this whole create super user process over again.
+
+
+
+5. Now you can use the admin interface by actually running the server and using the admin interface in the browser.
+
+
+
+6. python manage.py runserver
+
+
+
+7. from within the browser, you can put the main url/admin
+ then put in your username and password
+
+
+
+8.WOW, it is definitely cooler than I thought it would be. It basically looks like a really nice GUI for a database.
+
+
+	NOTE: It is very clear why it's important to minimize the amount of access to the admin interface. A lot of damage could be done if not protected.
+
+
+
+#####################################################################
+
+installing a faker data source to test database
+
+#####################################################################
+
+
+
+1. make sure you are in virtual environment, then in console:
+
+	code: pip isntall Faker
+  		documentation for Faker: faker.readthedocs.io
+
+
+
+2. create a new file in the main project directory:
+  Ex: populate_first_app_my.pyp
+
+3. open the new populate file. You then have to run a couple of lines of code before you can create any new code. Put this code at the top of the populate file:
+  code:
+    import os
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE','first_project_my.settings')
+
+    import django
+    django.setup()
+
+4. Then start adding code to create a fake population script
+## FAKE POP SCRIPT
+import random
+from first_app_my.models import AccessRecord,Webpage,Topic
+from faker import Faker
+
+5. Then create an instance of the faker object:
+fakegen = Faker()
+
+6. We can add some values to the topics field
+topics = ['Search','Social','Marketplace','News','Games']
+
+#### to populate the simple topic field ####
+7. Then we create a function that will let us add topics.
+  def add_topic():
+    t = Topic.objects.get_or_create(top_name=random.choice(topics))[0]
+    t.save()
+    return t
+
+#### to populate the more complex AccessRecord and Webpage
+8. Below the code in step 7.
+  code:
+  def populate(N=5):
+
+    for entry in range(N):
+
+      # get the topic for the entry
+      top = add_topic()
+
+      # Create the fake data for that entry
+      fake_url = fakegen.url()
+      fake_date = fakegen.date()
+      fake_name = fakegen.company()
+
+      # Create the new webpage entry
+      webpg = Webpage.objects.get_or_create(topic=top,url=fake_url,name=fake_name)[0]
+
+      # Create a fake access record for that Webpage
+      acc_rec = AccessRecord.objects.get_or_create(name=webpg,date=fake_date)[0]
+9. Then to actually use all that code, below the above code you would type:
+  code:
+  if __name__ == '__main__':
+    print("populating script!")
+    populate(20)
+    print("Populating complete!")
+
+10. Then run the file to test that it was populated! Make sure you are in the main project directory.
+  in the console:
+  python populate_first_app_my.py   <----or whatever you named the populate file.
+
+11. If successful, then try running the server to test your database.
+  code in console:
+    python manage.py runserver
+
+
+#####################################################################
+        using the MTV Paradigm (Models-Templates-Views)
+#####################################################################
+1. open up app directory
+
+2. we need to connect the app.views.py to the database, so first put this import code at the top
+  code: from first_app_my.models import Topic,Webpage,AccessRecord
+  NOTE: from app_name.modles import model1,model2,model3,etc...
+
+3. inside the the view function on the app_name.views.py file put this code:
+def index(request):
+  webpages_list = AccessRecord.objects.order_by('date')
+  date_dict = {'access_records':webpages_list}
+  return render(request,'first_app_my/index.html',context=date_dict)
+
+4. Now you will need to go to the html file that will be associated with the view you are trying to display.
+  Here is an example of how to access objects from the database and call certain attributes from those objects, then display them through html.
+  EXAMPLE:
+  <!DOCTYPE html>
+  {% load staticfiles %}
+  <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Django Level Two</title>
+      <link rel="stylesheet" href="{% static 'css/mystyle.css'%}">
+    </head>
+    <body>
+      <h1>Hi, welcome to Django Level 2!</h1>
+      <h2>Here are your access records:</h2>
+
+      <div class="djangtwo">
+        {% if access_records %}
+          <table>
+            <thead>
+              <th>Site Name</th>
+              <th>Date Accessed</th>
+            </thead>
+
+            {% for acc in access_records %}
+            <tr>
+              <td>{{ acc.name }}</td>
+              <td>{{ acc.date }}</td>
+            </tr>
+            {% endfor %}
+
+          </table>
+        {% else %}
+          <p>NO ACCESS RECORDS FOUND!</p>
+        {% endif %}
+      </div>
+
+    </body>
+  </html>
+
+5. Then test it and see if it worked. python manage.py runserver
+#####################################################################
+        PROJECT EXERCISE
+#####################################################################
+1. add a new model called "User"
+2. It should have these fields:
+  - First Name
+  - Last Name
+  - Email
+3. make sure to make the migrations
+4. create a script that will populate your database with fake Users
+5. confirm the populating through the admin interface.
+6. create a view for the website for the domain extension /users
+7. the /users extension page will be an HTML list of the user names and emails.
+8. use template tags to generate this content from the User model.
+9. Remember to change your urls.py files to deal with the changes to the /users extension! (Do this in both app.urls.py and project.urls.py)
+
+
+#####################################################################
+#####################################################################
+NOTE: The final Project 2 solutions walkthrough does a good job of hitting all the parts in sequence to start up a Django project. I believe my notes above to be very good and extensive.
+#####################################################################
+#####################################################################

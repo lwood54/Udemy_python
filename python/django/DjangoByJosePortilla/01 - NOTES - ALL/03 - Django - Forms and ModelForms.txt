@@ -1,0 +1,291 @@
+#####################################################################
+FORMS
+#####################################################################
+Advantages to Django Forms vs just normal HTML forms.
+  - Quickly generate HTML form widgets, like inputs that help you say whether it's going to be: email, checkboxes, etc.
+  - Validate data and process it into a Python data structure
+  - Create form versions of our Models, quickly update models from Forms
+
+
+#####################################################################
+    CREATING FORMS THROUGH DJANGO
+#####################################################################
+1. Go through same standard steps to get a Django project up and running. Be sure to make a page: templates > app > form_page.html
+2. Make a new file in the app directory called forms.py
+3. import from the Forms class in Django.
+  code:
+    from django import forms
+
+4. create a class
+  class FormName(forms.Form):
+    name = forms.CharField()
+    email = forms.EmailField()
+    text = forms.CharField(widget=forms.Textarea)
+    # there are many widget options. see the django documentation:
+    # https://docs.djangoproject.com/en/1.10/ref/forms/widgets/
+
+5. After you create a class in the forms.py, you need to set up a view for the form. You can do this in the views.py file in the app directory.
+  make sure to import the forms.
+  code at top:
+    Option 1: from . import forms
+    Option 2: from app_name import forms
+
+6. The view:
+  def index(request):
+    return render(request, 'basicapp/index.html')
+
+  def form_name_view(request):
+      form = forms.FormName()
+      return render(request,'basicapp/form_page.html',{'form':form})
+
+7. mak sure you point the urls.py files in the right direction like with models
+
+8. in project urls.py file
+    from django.conf.urls import url, include
+    from django.contrib import admin
+    from basicapp import views
+
+    urlpatterns = [
+        url(r'^$',views.index,name='index'),
+        url(r'^admin/', admin.site.urls),
+        url(r'^form_page/', views.form_name_view,name='form_name'),
+    ]
+9. go to form_page.html
+  put in the form tag/template tag to get the forms to display the view
+  <div class='container'>
+    {{form}}
+  </div>
+
+10. python manage.py runserver and test to see if it works.
+
+11. Then you can work on making the form look better by doing things like linking Bootstrap.
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+Also:
+ - make sure to put the {{form}} tag inside an html <form></form> tag
+ - instead of {{form}}, add .as_p ---> {{form.as_p}}
+    * this allows the form to run vertically instead of horizontally.
+
+12. It is imortant to add all the normal html tags that you would normally have in a form, including <input> to link a submit button so you can "POST" the data, then once collected, we can do other things with that data.
+<body>
+  <div class="container">
+    <h1>Fill ou the form please!</h1>
+    <form method="post">
+      {{form.as_p}}
+      {% csrf_token %}
+      <input type="submit" class="btn btn-primary" value="Submit">
+    </form>
+  </div>
+</body>
+
+13. You MUST have CSRF tag, which is a securit token. You can add the token above or below the {{form}} tag.
+  {% csrf_token %}
+
+14. To do stuff with the data, you will go to the views.py file.
+You can do things like form validation, responding to the user based on the data they entered. We are going to start with something small.
+  Example: (in the views.py file)
+
+    def form_name_view(request):
+      form = forms.FormName()
+
+      if request.method == 'POST':
+        form = forms.FormName(request.POST)
+
+        if form.is_valid():
+          # DO SOMETHING CODE HERE
+          # Example, but probably never normally do is print...
+          print("VALIDATION SUCCESS!")
+          print("Name: " + form.cleaned_data['name'])
+          print("Email: " + form.cleaned_data['email'])
+          print("Text: " + form.cleaned_data['text'])
+
+###### HIDDEN FIELDS ########
+Hidden fields are things that remain in the HTML, but remains hidden from the user. We can use these to try to prevent malicious bots.
+
+15. in the forms.py file in the app directory:
+inside the class:
+  class FormName(forms.Form):
+    name = forms.CharField()
+    email = forms.EmailField()
+    text = forms.CharField()
+    botcatcher = forms.CharField(required=False,
+                                  widget=forms.HiddenInput)
+
+16. to validate: (in order to do things like prevent bots, etc.)
+inside the same form class that it within the forms.py inside the app directory, create a clean_ method.
+So, to catch the botcatcher, we would do:
+  (again, inside the class)
+  def clean_botcatcher(self):
+    botcatcher = self.cleaned_data['botcatcher']
+    if len(botcatcher) > 0:
+      raise forms.ValidationError("GOTCHA BOT!")
+      return botcatcher
+######## this is how you might manually set up a form validator, but Django has built in validators ########
+
+######### IN REALITY, what you would actually most likely do is use Django's built in validators #################
+so you would import:
+from django.core import validators
+
+class FormName(forms.Form):
+    name = forms.CharField()
+    email = forms.EmailField()
+    text = forms.CharField(widget=forms.Textarea)
+    botcatcher = forms.CharField(required=False,
+                                widget=forms.HiddenInput,
+                                validators=[validators.MaxLengthValidator(0)])
+##### So for each of these fields, you can set a validators parameter to one of the built in validators. And in fact, you can do a list of validators, it isn't limited to just one. ####### So in the botcatcher example, if the hidden input value has a MaxLength over 0, then it's a bot because no person is going to go into the HTML code and add a random value to each input.
+
+#########################################################################
+      Making Custom Validators with the django import validators
+#########################################################################
+If you want to make your own custom validator for whatever reason, you can just make a function outside the class in the forms.py in the app directory.
+
+## since it takes a value, django knows it's a validator, then we just set the validator in the field = to the function.
+example:
+
+def check_for_z(value):
+  if value[0].lower != 'z':
+    raise forms.ValidationError("NAME NEEDS TO START WITH Z")
+
+class FormName(forms.Form):
+  name = forms.CharField(validators=[check_for_z])
+  email = forms.EmailField()
+  text = forms.CharField(widget=forms.Textarea)
+  botcatcher = forms.CharField(required=False,
+                              widget=forms.HiddenInput,validators=[validators.MaxLengthValidator(0)])
+
+#########################################################################
+      How to "clean" the entire field
+#########################################################################
+You would create a custom function from within the class and make a variable that is = to cleaning all the data, then you could call data from that variable.
+EXAMPLE:
+  def clean(self):
+    all_clean_data = super().clean() <-- super() calls all the data at once
+    email = all_clean_data['email'] <--it's a dictionary, so use key/value pairs.
+    vmail = all_clean_data['verify_email']
+
+    if email != vmail:
+      raise forms.ValidationError("MAKE SURE EMAILS MATCH!")
+
+#########################################################################
+            How to create Model Forms (storing form data to models)
+#########################################################################
+This is good for saving input data from forms to models/users.
+You will create a helperr class inside the forms class. It's called a Meta class.
+
+A generic setup in your forms.py file within the app directory.
+
+from django import forms
+from myapp.models import MyModel
+
+class MyNewForm(forms.ModelForm):
+  # form fields go here (like name, email, etc.)
+
+  class Meta:
+    model = MyModel
+    fields = # check out options
+
+*********** Even more common way for Model Forms:
+from django import forms
+from myapp.models import MyModel
+
+class MyNewForm(forms.ModelForm):
+  class Meta:
+    model = MyModel
+    fields = # check out options
+        ****** for security reasons, getting rid of the initial
+               form fields outside the meta class is common
+NOTE: If you want to use those built in Django Form validators,
+you HAVE to do the first version and put in the form fields above
+and outside the meta class and provide the validators params there as well.
+
+#########################################################################
+Options for setting fields in ModelForms
+#########################################################################
+
+Option 1: "__all__"
+
+from django import forms
+from myapp.models import MyModel
+class MyNewForm(forms.ModelForm):
+  # Form Fields go here
+  class Meta:
+    model = MyModel
+    fields = "__all__"
+#######################
+
+Option 2: exclude certain fields
+
+from django import formsfrom myapp.models import MyModel
+class MyNewForm(forms.ModelForm):
+  # Form Fields go here
+  class Meta:
+    model = MyModel
+    exclude = ["field1", "field2"]
+#######################
+
+Option 3: List included fields
+
+from django import forms
+from myapp.models import MyModel
+class MyNewForm(forms.ModelForm):
+  # Form Fields go here
+  class Meta:
+    model = MyModel
+    fields = ("field1", "field2")
+#########################################################################
+WALK THROUGH - from ProjTwo, adding forms and user logins?
+#########################################################################
+1. Fix up the .html pages in the templates to have a general idea of how you want it to look.
+
+2. make a forms.py file in the app directory.
+
+3. at the top of forms.py in the app directory:
+from django import forms
+from newApp.models import User
+
+4. create a class inside the forms.py file.
+
+class NewUserForm(forms.ModelForm):
+  # if you want to do your own custom validations, add fields here:
+  # first_name = forms.CharField(validator...)
+  class Meta():
+    model = User  # assign model to whatever model you are trying to link to
+    NOTE: if you had another model, you would make another class with its own model form
+    fields = '__all__'
+
+5. Go to views.py file in the app directory and make sure that its connected to the form properly and make sure that it's going to do something when the user hits submit.
+
+6. make sure to import the new model form from the forms.py file
+from newApp.forms import NewUser
+
+7. inside the users function in the views.py file:
+  def users(request):
+    form = NewUserForm()
+
+    if request.method = "POST":
+      form = NewUserForm(request.POST)
+
+      if form.is_valid():
+        form.save(commit=True) <---- saves and commits the submitted data to the database
+        return index(request)
+      else:
+        print("ERROR, FORM INVALID")
+
+    return render(request,'newApp/users.html',{'form':form})
+
+8. Go back to the users.html page and set it up to where the data is passed and the user can actually see what's needed.
+<div class="container">
+  <h1>Please sign up here!</h1>
+  <form method="POST">
+    <!--
+    Remember to add .as_p to format each field in the form "as a <p>"
+    -->
+    {{ form.as_p }}
+    {% csrf_token %}  <--- required, and for security
+    <input type="submit" class='btn btn-primary' value="Submit">
+  </form>
+</div>
+
+##############################
+NOTE: Now you should be able to have users sign up for the website, get the information

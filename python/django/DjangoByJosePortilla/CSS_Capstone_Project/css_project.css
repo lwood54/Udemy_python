@@ -1,0 +1,50 @@
+/*for the font I picked: font-family: 'Fjalla One', sans-serif;*/
+* {
+  text-align: center;
+  color: white;
+  font-family: 'Fjalla One', sans-serif;
+}
+
+body {
+  background-color: #081a38;
+}
+
+#top {
+  background-color: #4286f4;
+  height: 25px;
+  margin: -1%;
+  margin-bottom: 2%;
+}
+
+.container {
+  background-color: #4286f4;
+  margin: -2% 5% 5% 5%;
+  padding-bottom: 1%;
+}
+
+p {
+  margin: 10% auto;
+  width: 50%;
+}
+
+#thanks {
+  padding-top: 25%;
+}
+
+.signup input {
+  color: black;
+  width: 25%;
+  font-size: 1.2em;
+}
+
+#signupbutton {
+  background-color: orange;
+  color: black;
+  width: 10%;
+  height: 80px;
+  margin-top: 20px;
+  padding: 1%;
+  padding-top: 2%;
+  padding-bottom: 2%;
+  border-radius: 20px;
+}

@@ -1,0 +1,24 @@
+{% extends 'basicApp/base.html' %}
+{% load staticfiles %}
+{% block body_block %}
+
+  <h1 class="title">Welcome to the Secret Page!</h1>
+  <h2 class="title">Connect four and win!</h2>
+  <h3 class="title" id="turn"></h3>
+  <div class="container-fluid text-center" id="reset">
+    <button class="btn btn-default" id="startBtn">Restart Game!</button>
+  </div>
+  <div class="container-fluid">
+    <div class='container-fluid' id="gameContainer">
+    </div>
+  </div>
+
+
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+<script src="{% static 'js/connectFour.js' %}"></script>
+{% endblock %}

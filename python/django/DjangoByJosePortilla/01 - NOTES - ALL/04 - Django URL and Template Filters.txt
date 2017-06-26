@@ -1,0 +1,237 @@
+Relative URLs with Templates:
+  - So far we've had to use an anchor tag with an href we've passed in that was a hardcoded path to the file.
+  - That is poor practice if we want our Django project to work on any system.
+
+The best "future-proof" strategy for not hardcoding in urls is to basically set up a variable in the urls.py file that is equal to the path, then call that variable with the template tags in the .html file.
+
+########################################################################
+      REFRESHER WALKTHROUGH TO SETUP A NEW PROJECT & APP
+      (see earlier Django Levels for more detailed walkthrough/notes)
+########################################################################
+NOTE: I'm just going to use the names I'm using in the example, at this point, it should be obvious when I can change a name or whether it's a required keyword or variable.
+1. create directory to store project
+2. command line: django-admin startproject learnTemplates
+3. open main project directory
+4. command line: python manage.py startapp basicApp
+5. in main project directory:
+  - create directory called "templates"
+6. in templates directory:
+  - create another directory "basicApp"
+7./learnTemplates/settings.py:
+  add: TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
+8./learnTemplates/settings.py:
+  INSTALLED_APPS = [
+  ..... ,
+  'basicApp',
+  ]
+9./learnTemplates/settings.py:
+  TEMPLATES = [
+  .....
+  'DIRS': [TEMPLATE_DIR,],
+  ]
+10. Set up the html pages that you are planning on using.
+11. /basicApp/views.py
+    from django.shortcuts import render
+
+    # Create your views here.
+    def index(request):
+        return render(request,'basicApp/index.html')
+
+    def other(request):
+        return render(request,'basicApp/other.html')
+
+    def relative(request):
+        return render(request,'basicApp/relativeUrlTemplates.html')
+
+12. Set Up Urls to point to views:
+  /learnTemplates/urls.py:
+    from django.conf.urls import url,include
+    from django.contrib import admin
+    from basicApp import views
+
+    urlpatterns = [
+        url(r'^$',views.index,name='index')
+        url(r'^admin/', admin.site.urls),
+        url(r'^basicApp/',include('basicApp.urls'))
+    ]
+
+13. create the basicApp.urls.py file, then
+  /basicApp/urls.py:
+    from django.conf.urls import url
+    from basicApp import views
+    # could be from . import views, but basicApp seems more clear
+
+    # TEMPLATE TAGGING
+    app_name = 'basicApp'
+
+    urlpatterns = [
+        url(r'^relative/$',views.relative,name='relative'),
+        url(r'^other/$',views.other,name='other'),
+    ]
+
+# Using relative tags
+14. templates/relativeUrlTemplates.html:
+    <body>
+      <h1>Welcome to Relative URL Templates</h1>
+      <a href="{% url 'index' %}">Home Page</a>
+      <a href="{% url 'basicApp:other' %}">The Other Page</a>
+      <a href="{% url 'admin:index' %}">Admin</a>
+
+      <!--
+      instead of directly linking it to a directory path in the href="", you will do the {% %} tags.
+      url = keyword
+      'basicApp' ---> MUST match the app_name = _____ variable in the basicApp/urls.py file
+      other ---> matches the urlpatterns name="other", in the same basicApp/urls.py file
+      -->
+    </body>
+
+15. In order for admin to work at this point, you need to migrate.
+    command line: python manage.py migrate
+    NOTE: At this point, you can runserver and check. ???? When is it best to do python manage.py makemigrations ????
+
+########################################################################
+    TEMPLATE INHERITANCE
+########################################################################
+NOTE: Having a base.html page allows you to carry out a similar style structure throughout all your html pages. So, for example, instead of making a navbar at the top of each page by having the same HTML code in each individual .html file.
+  Instead, we set it to the base.html file and inherit it using the template inheritance!!!
+    The extension or inheritance of the base.html file doesn't have to just be that one base.html file, you can "extend" or "inherit" from multiple templates.
+STEPS for INHERITANCE:
+1. Find the repetitive parts of your project
+2. Create a base template of them
+3. Set the tags in the base template
+4. Extend and call those tags anywhere.
+
+BASIC EXAMPLE of Template Inheritance:
+1. open base.html
+2. provide normal html setup for base.html
+3. We can now do things like link bootstrop (and I assume jQuery), to the base.html file and then extend it to other .html files.
+##################################
+          SAMPLE base.html PAGE
+##################################
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <ul class="nav navbar-nav">
+          <li><a class="navbar-brand" href="{% url 'index' %}">BRAND</a></li>
+          <li><a class="navbar-link" href="{% url 'admin:index'%}">Admin</a></li>
+          <li><a class="navbar-link" href="{% url 'basicApp:other'%}">Other</a></li>
+        </ul>
+      </div>
+
+    </nav>
+
+    <!--
+    Putting in a blank div tag with "container" class allows you to
+    not have to keep putting new html content inside a new div "container" class every time to get that nice look.
+    -->
+    <div class="container">
+      {% block body_block %}
+      <!--
+        Anything outside of this will be inherited if you extend!
+      -->
+      {% endblock %}
+    </div>
+  </body>
+</html>
+
+
+##################################
+EASILY EXTEND TO OTHER .html PAGES
+##################################
+<!DOCTYPE html>
+{% extends "basicApp/base.html" %}
+  {% block body_block %}
+  <!--
+    So now, whatever is typed with the "block" is unique to just this .html page
+  -->
+  <h1>Welcome to Other Page</h1>
+  {% endblock %}
+##################################
+##################################
+NOTE: Things to check on, but I'm pretty sure work. You should be able to name the "block" whatever you want. So you could do
+{% block head_block %}
+
+{% endblock %}
+
+I also think, you should be able to link the jQuery file at the bottom of the body.
+##################################
+TEMPLATE Filters
+##################################
+documentation for filters:
+https://docs.djangoproject.com/en/1.10/topics/templates/
+
+#########################################
+Basic Filter Use Example:
+#########################################
+1. You need to create a context dictionary to pass filters to the view
+    /basicApp/views.py:
+      def index(request):
+        context_dict = {'text':'hello world','number':100}
+        return render(request,'basicApp/index.html',context_dict)
+2. /templates/basicApp/index.html:
+    <!DOCTYPE html>
+    {% extends "basicApp/base.html" %}
+      {% block body_block %}
+        <!--
+          inject context with template tags
+        -->
+        <h1>Welcome to the Home Page!</h1>
+        <h1>{{ text|upper }}</h1>
+        <h1>{{ number|add:"54" }}</h1>
+      {% endblock %}
+#########################################
+    Creating Custom Filter Template Tags
+#########################################
+1. create a new "templatetags" directory in your app directory
+2. create a new "__init__.py" file in the templatetags directory
+    /basicApp/templatetags/__init__.py
+    NOTE: When you make this empty file it basically tells python to treat the directory as a module, so it can call it and load it in.
+3. next, create a new file which is where you will store your custom templates.
+  /basicApp/templatetags/my_extras.py (whatever file name you want here)
+4. next, you create a function in the my_extras.py file, making sure to import template from django.
+
+/basicApp/templatetags/my_extras.py:
+  from django import template
+
+  register = template.Library()
+
+  def cut(value,arg):
+    """
+    This cuts out all values of "arg" from the string!
+    """
+    return value.replace(arg,'')
+
+5. we need to register this with django, so in the same file as step 4...
+  register.filter('cut',cut)
+        # 'cut' ---> the string that you are going to call the function
+        # cut ---> this is the actual function that you made above
+6. then use the filter via template tags in the .html file
+
+      <h1>{{ text|cut:'hello' }}</h1>
+
+7. NOTE: Alternate:
+    Instead of using register.filter('cut',cut), you can use decorators.
+
+
+    from django import template
+
+    register = template.Library()
+
+    ## isntead of register.filter('cut',cut), you can do:
+    @register.filter(name='cut')
+    def cut(value,arg):
+        """
+        This cuts out all values of 'arg' from the string!
+        """
+        return value.replace(arg,'')
+
+    # register.filter('cut',cut) NOTE: Personall, this line seems clearer to me.

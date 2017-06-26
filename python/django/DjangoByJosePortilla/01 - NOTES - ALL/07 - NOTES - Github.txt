@@ -1,0 +1,47 @@
+##########################
+SETTING UP GIT HUB
+##########################
+1. setup account at github.com
+
+2. make sure git is installed
+  >>> git --version
+
+3. create new directory where projects will go
+
+4. copy and paste one of the projects we have worked on
+  (I'm using Django_Level_Five_My)
+
+5. paste the project into the new directory, ex. my_projects
+
+6. here are the instructions at github.com's site to add new project
+echo "# django-deployment-example" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/lwood54/django-deployment-example.git
+git push -u origin master
+
+7. Jose says for first project, don't worry about README.md
+so..
+  >>>git init
+  >>>git add .  (this basically means git add everything)
+                (I assume that means "everything" in the directory
+                that we are currently in.)
+  >>>git commit . -m 'first'
+  >>>git remote add origin https://github.com/lwood54/django-deployment-example.git
+      (copy and paste from instructions on github.com when adding a repo)
+  >>>git push -u origin master
+
+
+##########################
+UPDATING PROJECT AND Pushing back to Github
+##########################
+1. checkout whatever branch you are working on, like master
+2. make changes and save files
+3. command line:
+  >>>git add .    (adds all changes and files at once,
+                  you can individually specify if you want to,
+                  but there are other instrutions that will need
+                  to be looked up.)
+  >>>git commit -m "type clear message here"
+  >>>git push origin master

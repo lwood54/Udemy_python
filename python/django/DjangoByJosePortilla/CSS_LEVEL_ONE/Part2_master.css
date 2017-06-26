@@ -1,0 +1,20 @@
+body{
+  background: url(http://gotravelaz.com/wp-content/uploads/images/Mountain_View_20176.jpg);
+  background-size: cover;
+}
+
+div{
+  background: blue;
+  border-color: orange;
+  border-width: 5px;
+  border-style: double;
+}
+
+p{
+  color: yellow;
+}
+
+span{
+  background: red;
+  color: black;
+}

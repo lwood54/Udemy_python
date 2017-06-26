@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Tic Tac Toe Challenge!</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href="tictactoe.css">
+    <link href="https://fonts.googleapis.com/css?family=Indie+Flower" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="title" class="jumbotron text-center">Tic Tac Toe Challenge</h1>
+      <div class="container text-center">
+        <div class="row">
+          <div class="col-xs-3">
+            <button class="btn btn-primary" type="button" name="button">RESTART</button>
+          </div>
+          <div class="col-xs-6 text-center">
+            <h2 id="turn" class="jumbotron text-center">It's A's turn!</h2>
+          </div>
+          <div class="col-xs-3">
+          </div>
+        </div>
+      </div>
+      <!-- <div class="text-center container radio btn-primary btn-lg">
+        <label><input id="X" type="radio" name="radio" value="It is X's turn.">It is X's turn.</label>
+      </div>
+      <div class="text-center container radio btn-primary btn-lg">
+        <label><input id="O" type="radio" name="radio" value="It is O's turn.">It is O's turn.</label>
+      </div> -->
+
+      <div class="container" id="gameboard">
+        <table class="table table-bordered">
+          <tr>
+            <td id="box1"> </td>
+            <td id="box2"></td>
+            <td id="box3"></td>
+          </tr>
+          <tr>
+            <td id="box4"></td>
+            <td id="box5"></td>
+            <td id="box6"></td>
+          </tr>
+          <tr>
+            <td id="box7"></td>
+            <td id="box8"></td>
+            <td id="box9"></td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+    <script src="tictactoe.js">
+    </script>
+  </body>
+</html>
